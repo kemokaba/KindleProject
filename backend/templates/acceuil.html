@@ -13,7 +13,7 @@
 
   <body>
   <div class="container bg-light p-2 rounded-2">
-    <form>
+    <form action="">
         <div class="input-group mb-3">
             <input id="book" type="text" name="book" class="form-control" placeholder="Recherche" aria-label=" " aria-describedby="button-addon2" row="3">
           <button type="submit" class="btn btn-outline-secondary" type="button" id="button-addon2">Rechercher</button>
@@ -23,17 +23,17 @@
   </div>
   <br>
   <div class="container p-0 rounded-2">
-    {% for book in books %}
+    {% for book in results %}
      <div class="card bg-light mb-3">
-       <div class="card-header  text-start" >Titre: {{book['title']}}</div>
+       <div class="card-header  text-start" >Titre: {{book['titre']}}</div>
        <div class="card-body text-center">
-         <img alt="img" src="{{book['formats']['image/jpeg']}}">
+
          <br>
-         <a href="{{book['formats']['text/plain; charset=us-ascii']}}">Text du livre</a>
+         <a href="{{book['contenu']}}">Text du livre</a>
 
 
        </div>
-       <div class="card-footer bg-transparent">Auteur : {{book['authors']}}</div>
+       <div class="card-footer bg-transparent">Auteur : {{book['auteur']}}</div>
 
      </div>
     {%endfor%}
