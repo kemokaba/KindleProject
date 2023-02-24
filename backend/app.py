@@ -78,20 +78,16 @@ def index():
     regex = "Adve[a-z]*ture"
     regex1 = "r'^/[A-Za-z0-9]+$/'"
 
-    if re.match('Adve[a-z]*ture', str(book)):
+    if re.match(r'^/[A-Za-z0-9]+$/', str(book)):
             regex_results = []
             books = Livre.query.all()
             for book in books:
                 if re.search(book, book.contenu, book.titre):
-                    regex_results.append({'id': book.id, 'titre': book.titre, 'auteur': book.auteur})
+                    regex_results.append({'id': book.id,'contenu':book.contenu, 'titre': book.titre, 'auteur': book.auteur})
             results = regex_results
+            matches = re.findall(results)
+            print("results", {len(matches)})
     return render_template('acceuil.html', results=results, book=book)
-
-
-
-
-
-
 
 if __name__ == '__main__':
     app.run()
