@@ -60,7 +60,7 @@ for book in books1:
 db.session.commit()
 
 
-@app.route('/',methods=['GET'])
+@app.route('/book',methods=['GET'])
 @cross_origin()
 
 def index():
@@ -73,21 +73,23 @@ def index():
     #return render_template('acceuil.html', books=books)
 
     # Récupération de la recherche de l'utilisateur
-    book = request.args.get('book')
+    search = request.args.get('search')
     # Recherche des livres par mot clé
     results = []
     books1 = Livre.query.filter(
-        or_(Livre.titre.ilike(f'%{book}%'), Livre.auteur.ilike(f'%{book}%'))).all()
+        or_(Livre.titre.ilike(f'%{search}%'), Livre.auteur.ilike(f'%{search}%'))).all()
     for b1 in books1:
         results.append({'auteur': b1.auteur, 'contenu':b1.contenu, 'titre': b1.titre, 'id': b1.id})
     #print(results)
     return jsonify(results)
+
 @app.route('/book/searchRegex',methods=['GET'])
 def searchRegex():
 
-    regex = request.args.get('regex', '')
+    regex = request.args.get('regex')
     regex_results = []
-    if re.match(regex, str(regex)):
+    reges = 'Adve[a-z]*ture'
+    if re.match(reges, str(regex)):
             books2 = Livre.query.all()
             for b2 in books2:
                 if re.search(regex, b2.contenu) or (regex, b2.titre) or (regex, b2.auteur)or (regex, b2.id):
@@ -98,8 +100,7 @@ def searchRegex():
     #print(regex_results)
     return jsonify(regex_results)
 
-
-# Recherche avec Jaccard
+#Recherche avec Jaccard
 
 
 
