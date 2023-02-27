@@ -2,12 +2,17 @@ from operator import or_
 import requests, jsonify, request
 from flask import *
 import re
-
+from flask_cors import CORS, cross_origin
 from flask_sqlalchemy import SQLAlchemy
+
 app = Flask(__name__)
+cors = CORS(app)
+
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:passer1234@localhost/books'
 app.app_context().push()
 db = SQLAlchemy(app)
+
 
 # Models
 class Livre(db.Model):
@@ -49,12 +54,15 @@ for book in books1:
     book_titre = book['title']
     book_auteur = book['authors'][0]['name'] if book['authors'] else 'Unknown'
     book_contenu = "https://www.gutenberg.org/files/"+str(book_id)+"/"+str(book_id)+"-0.txt"
-    # Ajout des données à la table d'indexb
+    # Ajout des données à la table d'index
     index_entry = Livre(id=book_id,titre=book_titre, auteur=book_auteur,contenu=book_contenu)
     #db.session.add(index_entry)
 db.session.commit()
 
+
 @app.route('/',methods=['GET'])
+@cross_origin()
+
 def index():
     books = []
     #if 'book' in request.args:
@@ -66,28 +74,34 @@ def index():
 
     # Récupération de la recherche de l'utilisateur
     book = request.args.get('book')
-
     # Recherche des livres par mot clé
     results = []
-    books = Livre.query.filter(
+    books1 = Livre.query.filter(
         or_(Livre.titre.ilike(f'%{book}%'), Livre.auteur.ilike(f'%{book}%'))).all()
-    for book in books:
-        results.append({'id': book.id, 'titre': book.titre,'contenu':book.contenu, 'auteur': book.auteur})
+    for b1 in books1:
+        results.append({'auteur': b1.auteur, 'contenu':b1.contenu, 'titre': b1.titre, 'id': b1.id})
+    #print(results)
+    return jsonify(results)
+@app.route('/book/searchRegex',methods=['GET'])
+def searchRegex():
 
-    # Recherche des livres par regex
-    regex = "Adve[a-z]*ture"
-    regex1 = "r'^/[A-Za-z0-9]+$/'"
+    regex = request.args.get('regex', '')
+    regex_results = []
+    if re.match(regex, str(regex)):
+            books2 = Livre.query.all()
+            for b2 in books2:
+                if re.search(regex, b2.contenu) or (regex, b2.titre) or (regex, b2.auteur)or (regex, b2.id):
+                    regex_results.append({'auteur': b2.auteur,
+                                          'contenu':b2.contenu,
+                                          'titre': b2.titre,
+                                          'id': b2.id})
+    #print(regex_results)
+    return jsonify(regex_results)
 
-    if re.match(r'^/[A-Za-z0-9]+$/', str(book)):
-            regex_results = []
-            books = Livre.query.all()
-            for book in books:
-                if re.search(book, book.contenu, book.titre):
-                    regex_results.append({'id': book.id,'contenu':book.contenu, 'titre': book.titre, 'auteur': book.auteur})
-            results = regex_results
-            matches = re.findall(results)
-            print("results", {len(matches)})
-    return render_template('acceuil.html', results=results, book=book)
+
+# Recherche avec Jaccard
+
+
 
 if __name__ == '__main__':
     app.run()
